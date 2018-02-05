@@ -1,10 +1,15 @@
 # Home Assistant Omnik Solar sensor component
 Home Assistant Omnik Solar sensor component.
 
+### Installation:
+
+Copy the omnik.py file and place it in <config_dir>/custom_components/sensor/omnik.py.
+
 ### Example entry for configuration.yaml
+
 ```
 sensor:
-  - platform: omni
+  - platform: omnik
     datasource: inverter_and_portal
     inverter_host: <ip address inverter>
     inverter_port: <port inverter>
