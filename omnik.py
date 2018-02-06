@@ -6,6 +6,10 @@
   When the inverter is powered off the missing data is retrieved from the Omnik portal.
   
   For more information: https://github.com/heinoldenhuis/home_assistant_omnik_solar/
+  
+  Information used and inspiration from source:
+  https://github.com/KoenZomers/OmnikApi
+  https://github.com/Woutrrr/Omnik-Data-Logger
 """
 
 import logging
