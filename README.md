@@ -50,20 +50,20 @@ Configuration variables:
 * **portal_username** (Optional): The username used for the [Omnik Portal](https://www.omnikportal.com/).
 * **portal_password** (Optional): The password used for the [Omnik Portal](https://www.omnikportal.com/).
 * **sensors** (Required): List of values which will be presented as sensors:
-  * actualpower: Sensor with the actual power value (inverter and portal).
-  * energytoday: Sensor with the total energy value for the current day (inverter and portal).
-  * energytotal: Sensor with the total energy value (inverter and portal).
-  * hourstotal: Sensor with the actual power value (inverter).
-  * invertersn: Sensor with the serial number value (inverter).
-  * temperature: Sensor with the temperature value for the inverter (inverter).
-  * dcinputvoltage: Sensor with the actual DC input voltage value (inverter).
-  * dcinputcurrent: Sensor with the actual DC input current value (inverter).
-  * acoutputvoltage: Sensor with the actual AC output voltage value (inverter).
-  * acoutputcurrent: Sensor with the actual AC output current value (inverter).
-  * acoutputfrequency: Sensor with the actual AC output frequenty value (inverter).
-  * acoutputpower: Sensor with the actual AC output power value (inverter).
-  * incometoday: Sensor with the total income for today value (portal).
-  * incometotal: Sensor with the total income value (portal).
+  * *actualpower*: Sensor with the actual power value (inverter and portal).
+  * *energytoday*: Sensor with the total energy value for the current day (inverter and portal).
+  * *energytotal*: Sensor with the total energy value (inverter and portal).
+  * *hourstotal*: Sensor with the actual power value (inverter).
+  * *invertersn*: Sensor with the serial number value (inverter).
+  * *temperature*: Sensor with the temperature value for the inverter (inverter).
+  * *dcinputvoltage*: Sensor with the actual DC input voltage value (inverter).
+  * *dcinputcurrent*: Sensor with the actual DC input current value (inverter).
+  * *acoutputvoltage*: Sensor with the actual AC output voltage value (inverter).
+  * *acoutputcurrent*: Sensor with the actual AC output current value (inverter).
+  * *acoutputfrequency*: Sensor with the actual AC output frequenty value (inverter).
+  * *acoutputpower*: Sensor with the actual AC output power value (inverter).
+  * *incometoday*: Sensor with the total income for today value (portal).
+  * *incometotal*: Sensor with the total income value (portal).
 
 You can create composite sensors, where the subsensors will be shown as attributes of the main sensor, for example:
 ```
