@@ -65,6 +65,8 @@ Configuration variables:
   * *incometoday*: Sensor with the total income for today value (portal).
   * *incometotal*: Sensor with the total income value (portal).
 
+> Note: Not all values could be retrieved from either the inverter or portal. In the case no value could be retrieved the value is unknown, for numbers 0 is returned.
+
 You can create composite sensors, where the subsensors will be shown as attributes of the main sensor, for example:
 ```
     sensors:
