@@ -1,9 +1,9 @@
 """
   Omnik Solar interface.
   
-  This component can retrieve data from the inverter or the Omnik portal.
-  If combined the component first tries to retrieve the data from the inverter.
-  When the inverter is powered off the missing data is retrieved from the Omnik portal.
+  This component can retrieve data from the Omnik solar inverter or the Omnik portal.
+  If combined the component first tries to retrieve the data from the Omik solar inverter.
+  When the Omnik solar inverter is powered off the missing data can be retrieved from the Omnik portal.
   
   For more information: https://github.com/heinoldenhuis/home_assistant_omnik_solar/
   
