@@ -263,8 +263,6 @@ class OmnikData(object):
     if(self.interface_portal is not None):
       read_portal = True
     
-    #_LOGGER.warn('read_sensor: inverter enabled %s, inverter read %s, read portal %s', inverter_enabled, read_inverter, read_portal)
-    
     """ Retrieve value. """
     if(sensor_type == 'actualpower'):
       if((read_inverter == True) and (inverter_enabled == True)):
