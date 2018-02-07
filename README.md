@@ -1,7 +1,7 @@
 # Home Assistant Omnik solar sensor component
 The Omnik soloar sensor component will poll a Omnik solar inverter and/or extract values from the [Omnik Portal](https://www.omnikportal.com/). The values will be presented as sensors (or attributes of sensors) in [Home Assistant](https://home-assistant.io/).
 
-Has a datasource the user can choose to only retrieve data from the Omnik solar inverter or the Omnik portal, or the user can choose to retrieve the data from both datasources.
+With the datasource option the user can choose to only retrieve data from the Omnik solar inverter or the Omnik portal, or the user can choose to retrieve the data from both datasources.
 > Note: When data is retrieved from both datasources the available Omnik solar inverter values are used first. When the Omnik solar inverter is powered off the missing values are retrieved from the Omnik portal.
 
 ### Installation:
@@ -10,7 +10,7 @@ Copy the omnik.py file and place it in <config_dir>/custom_components/sensor/omn
 
 To enable this sensor, add the following lines to your configuration.yaml file:
 
-```
+``` YAML
 sensor:
   - platform: omnik
     datasource: inverter_and_portal
@@ -68,7 +68,7 @@ Configuration variables:
 > Note: Not all values could be retrieved from either the inverter or portal. In the case no value could be retrieved the value is unknown, for numbers 0 is returned.
 
 You can create composite sensors, where the subsensors will be shown as attributes of the main sensor, for example:
-```
+``` YAML
     sensors:
       actualpower: [energytotal, energytoday]
 ```
