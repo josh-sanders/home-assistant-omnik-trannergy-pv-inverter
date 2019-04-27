@@ -1,15 +1,9 @@
 """
   Omnik Solar interface.
   
-  This component can retrieve data from the Omnik solar inverter or the Omnik portal.
-  If combined the component first tries to retrieve the data from the Omik solar inverter.
-  When the Omnik solar inverter is powered off the missing data can be retrieved from the Omnik portal.
+  This component can retrieve data from the Omnik inverter.
   
   For more information: https://github.com/heinoldenhuis/home_assistant_omnik_solar/
-  
-  Information used and inspiration from source:
-  https://github.com/KoenZomers/OmnikApi
-  https://github.com/Woutrrr/Omnik-Data-Logger
 """
 
 import logging
@@ -31,32 +25,24 @@ import socket
 import struct
 import sys
 
+# VERSION
+VERSION = '0.0.2'
+
 BASE_URL = 'http://{0}:{1}{2}'
 
 _LOGGER = logging.getLogger(__name__)
 
 DEFAULT_PORT_INVERTER = 8899
-DEFAULT_PORT_PORTAL = 10000
 MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=60)
 
-CONF_DATASOURCE = 'datasource'
 CONF_INVERTER_HOST = 'inverter_host'
 CONF_INVERTER_PORT = 'inverter_port'
 CONF_INVERTER_SERIAL = 'inverter_serial'
-CONF_PORTAL_HOST = 'portal_host'
-CONF_PORTAL_PORT = 'portal_port'
-CONF_PORTAL_USERNAME = 'portal_username'
-CONF_PORTAL_PASSWORD = 'portal_password'
 CONF_SENSORS = 'sensors'
-
-DATASOURCE_TYPES = {
-    'inverter_and_portal',
-    'inverter',
-    'portal'
-  }
 
 SENSOR_PREFIX = 'Omnik '
 SENSOR_TYPES = {
+    'status':            ['Status', None, 'mdi:solar-power'],
     'actualpower':       ['Actual Power', 'W', 'mdi:weather-sunny'],
     'energytoday':       ['Energy Today', 'kWh', 'mdi:flash-outline'],
     'energytotal':       ['Energy Total', 'kWh', 'mdi:flash-outline'],
@@ -69,16 +55,9 @@ SENSOR_TYPES = {
     'acoutputcurrent':   ['AC Output Current', 'A', 'mdi:flash-outline'],
     'acoutputfrequency': ['AC Output Frequency', 'Hz', 'mdi:flash-outline'],
     'acoutputpower':     ['AC Output Power', 'W', 'mdi:flash-outline'],
-    'incometoday':       ['Income Today', 'EUR', 'mdi:currency-eur'],
-    'incometotal':       ['Income Total', 'EUR', 'mdi:currency-eur'],
   }
 
 def _check_config_schema(conf):
-  """ Check if the data source is valid. """
-  datasource = conf[CONF_DATASOURCE]
-  if(datasource not in DATASOURCE_TYPES):
-    raise vol.Invalid('datasource {} is not valid'.format(datasource))
-  
   """ Check if the sensors and attributes are valid. """
   for sensor, attrs in conf[CONF_SENSORS].items():
     if(sensor not in SENSOR_TYPES):
@@ -90,42 +69,23 @@ def _check_config_schema(conf):
   return conf
 
 PLATFORM_SCHEMA = vol.All(PLATFORM_SCHEMA.extend({
-    vol.Required(CONF_DATASOURCE): cv.string,
     vol.Optional(CONF_INVERTER_HOST, default=None): cv.string,
     vol.Optional(CONF_INVERTER_PORT, default=DEFAULT_PORT_INVERTER): cv.positive_int,
     vol.Optional(CONF_INVERTER_SERIAL, default=None): cv.positive_int,
-    vol.Optional(CONF_PORTAL_HOST, default=None): cv.string,
-    vol.Optional(CONF_PORTAL_PORT, default=DEFAULT_PORT_PORTAL): cv.positive_int,
-    vol.Optional(CONF_PORTAL_USERNAME, default=None): cv.string,
-    vol.Optional(CONF_PORTAL_PASSWORD, default=None): cv.string,
     vol.Required(CONF_SENSORS): vol.Schema({cv.slug: cv.ensure_list}),
 }, extra=vol.PREVENT_EXTRA), _check_config_schema)
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
   """ Set up Omnik sensor. """
-  datasource = config.get(CONF_DATASOURCE)
   inverter_host = config.get(CONF_INVERTER_HOST)
   inverter_port = config.get(CONF_INVERTER_PORT)
   inverter_sn = config.get(CONF_INVERTER_SERIAL)
-  portal_host = config.get(CONF_PORTAL_HOST)
-  portal_port = config.get(CONF_PORTAL_PORT)
-  portal_user = config.get(CONF_PORTAL_USERNAME)
-  portal_pass = config.get(CONF_PORTAL_PASSWORD)
   
   """ Check input configuration. """
-  if(datasource == 'inverter_and_portal') or (datasource == 'inverter'):
-    if(inverter_host == None):
-      raise vol.Invalid('configuration parameter [inverter_host] does not have a value')
-    if(inverter_sn == None):
-      raise vol.Invalid('configuration parameter [inverter_serial] does not have a value')
-  
-  if (datasource == 'inverter_and_portal') or (datasource == 'portal'):
-    if(portal_host == None):
-      raise vol.Invalid('configuration parameter [portal_host] does not have a value')
-    if(portal_user == None):
-      raise vol.Invalid('configuration parameter [portal_username] does not have a value')
-    if(portal_pass == None):
-      raise vol.Invalid('configuration parameter [portal_password] does not have a value')
+  if(inverter_host == None):
+    raise vol.Invalid('configuration parameter [inverter_host] does not have a value')
+  if(inverter_sn == None):
+    raise vol.Invalid('configuration parameter [inverter_serial] does not have a value')
   
   """ Determine for which sensors data should be retrieved. """
   used_sensors = []
@@ -134,7 +94,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     used_sensors.extend(subtypes)
     
   """ Initialize the Omnik data interface. """
-  data = OmnikData(datasource, inverter_host, inverter_port, inverter_sn, portal_host, portal_port, portal_user, portal_pass, used_sensors)
+  data = OmnikData(inverter_host, inverter_port, inverter_sn, used_sensors)
   
   """ Prepare the sensor entities. """
   hass_sensors = []
@@ -166,7 +126,7 @@ class OmnikSensor(Entity):
   def icon(self):
     """ Return the icon of the sensor. """
     return self.p_icon
-  
+    
   @property
   def name(self):
     """ Return the name of the sensor. """
@@ -212,26 +172,14 @@ class OmnikSensor(Entity):
 class OmnikData(object):
   """ Representation of a Omnik data object used for retrieving data values. """
   
-  def __init__(self, datasource, inverter_host, inverter_port, inverter_sn, portal_host, portal_port, portal_user, portal_pass, sensors):
+  def __init__(self, inverter_host, inverter_port, inverter_sn, sensors):
     """ Initialize Omnik data component. """
-    self._datasource = datasource
     self._inverter_host = inverter_host
     self._inverter_port = inverter_port
     self._inverter_sn = inverter_sn
-    self._portal_host = portal_host
-    self._portal_port = portal_port
-    self._portal_user =  portal_user
-    self._portal_pass = portal_pass
     self._sensors = sensors
-    self.interface_inverter = None
-    self.interface_portal = None
+    self.interface_inverter = OmnikInverter(self._inverter_host, self._inverter_port, self._inverter_sn)
     self.sensor_data = {type: None for type in list(self._sensors)}
-    
-    if(self._datasource == 'inverter_and_portal') or (self._datasource == 'inverter'):
-      self.interface_inverter = OmnikInverter(self._inverter_host, self._inverter_port, self._inverter_sn)
-    
-    if (self._datasource == 'inverter_and_portal') or (self._datasource == 'portal'):
-      self.interface_portal = OmnikPortal(self._portal_host, self._portal_port, self._portal_user, self._portal_pass) 
   
   def get_sensor_data(self):
     """ Return an array with the sensors and their values. """
@@ -239,11 +187,7 @@ class OmnikData(object):
   
   def get_statistics(self):
     """ Gets the statistics from the inverter or portal. """
-    if(self.interface_inverter is not None):
-      self.interface_inverter.get_statistics()
-    
-    if (self.interface_portal is not None):
-      self.interface_portal.get_statistics()
+    self.interface_inverter.get_statistics()
   
   def read_sensor(self, sensor_type):
     """ Gets the data values from the sensors. """
@@ -251,89 +195,45 @@ class OmnikData(object):
     
     """ Check if the inverter is operational. """
     inverter_enabled = False
-    read_inverter = False
-    if(self.interface_inverter is not None):
-      read_inverter = True
-      check = self.interface_inverter.get_temperature()
-      if(check is not None):
-        inverter_enabled = True
+    check = self.interface_inverter.get_temperature()
+    if(check is not None):
+      inverter_enabled = True
     
-    """ Check if the portal is operational. """
-    read_portal = False
-    if(self.interface_portal is not None):
-      read_portal = True
+    #_LOGGER.warn('read_sensor: inverter enabled %s', inverter_enabled)
     
     """ Retrieve value. """
+    if(sensor_type == 'status'):
+      if(inverter_enabled == True):
+        value = 'Online'
+      else:
+        value = 'Offline'
     if(sensor_type == 'actualpower'):
-      if((read_inverter == True) and (inverter_enabled == True)):
+      if(inverter_enabled == True):
         value = self.interface_inverter.get_actualpower()
-      elif((read_portal == True)):
-        value = self.interface_portal.get_actualpower()
+      else:
+        value = 0
     elif(sensor_type == 'energytoday'):
-      if((read_inverter == True) and (inverter_enabled == True)):
-        value = self.interface_inverter.get_energytoday()
-      elif((read_portal == True)):
-        value = self.interface_portal.get_energytoday()
+      value = self.interface_inverter.get_energytoday()
     elif(sensor_type == 'energytotal'):
-      if(read_inverter == True):
-        value = self.interface_inverter.get_energytotal()
-      elif((read_portal == True)):
-        value = self.interface_portal.get_energytotal()
-    elif sensor_type == 'hourstotal':
-      if(read_inverter == True):
-        value = self.interface_inverter.get_hourstotal()
-      elif((read_portal == True)):
-        value = self.interface_portal.get_hourstotal()
-    elif sensor_type == 'invertersn':
-      if(read_inverter == True):
-        value = self.interface_inverter.get_invertersn()
-      elif((read_portal == True)):
-        value = self.interface_portal.get_invertersn()
-    elif sensor_type == 'temperature':
-      if(read_inverter == True):
-        value = self.interface_inverter.get_temperature()
-      elif((read_portal == True)):
-        value = self.interface_portal.get_temperature()
-    elif sensor_type == 'dcinputvoltage':
-      if(read_inverter == True):
-        value = self.interface_inverter.get_dcinputvoltage()
-      elif((read_portal == True)):
-        value = self.interface_portal.get_dcinputvoltage()
-    elif sensor_type == 'dcinputcurrent':
-      if(read_inverter == True):
-        value = self.interface_inverter.get_dcinputcurrent()
-      elif((read_portal == True)):
-        value = self.interface_portal.get_dcinputcurrent()
-    elif sensor_type == 'acoutputvoltage':
-      if(read_inverter == True):
-        value = self.interface_inverter.get_acoutputvoltage()
-      elif((read_portal == True)):
-        value = self.interface_portal.get_acoutputvoltage()
-    elif sensor_type == 'acoutputcurrent':
-      if(read_inverter == True):
-        value = self.interface_inverter.get_acoutputcurrent()
-      elif((read_portal == True)):
-        value = self.interface_portal.get_acoutputcurrent()
-    elif sensor_type == 'acoutputfrequency':
-      if(read_inverter == True):
-        value = self.interface_inverter.get_acoutputfrequency()
-      elif((read_portal == True)):
-        value = self.interface_portal.get_acoutputfrequency()
-    elif sensor_type == 'acoutputpower':
-      if(read_inverter == True):
-        value = self.interface_inverter.get_acoutputpower()
-      elif((read_portal == True)):
-        value = self.interface_portal.get_acoutputpower()
-    elif sensor_type == 'incometoday':
-      if((read_portal == True)):
-        value = self.interface_portal.get_incometoday()
-      elif(read_inverter == True):
-        value = self.interface_inverter.get_incometoday()
-    elif sensor_type == 'incometotal':
-      if((read_portal == True)):
-        value = self.interface_portal.get_incometotal()
-      elif(read_inverter == True):
-        value = self.interface_inverter.get_incometotal()
+      value = self.interface_inverter.get_energytotal()
+    elif(sensor_type == 'hourstotal'):
+      value = self.interface_inverter.get_hourstotal()
+    elif(sensor_type == 'invertersn'):
+      value = self.interface_inverter.get_invertersn()
+    elif(sensor_type == 'temperature'):
+      value = self.interface_inverter.get_temperature()
+    elif(sensor_type == 'dcinputvoltage'):
+      value = self.interface_inverter.get_dcinputvoltage()
+    elif(sensor_type == 'dcinputcurrent'):
+      value = self.interface_inverter.get_dcinputcurrent()
+    elif(sensor_type == 'acoutputvoltage'):
+      value = self.interface_inverter.get_acoutputvoltage()
+    elif(sensor_type == 'acoutputcurrent'):
+      value = self.interface_inverter.get_acoutputcurrent()
+    elif(sensor_type == 'acoutputfrequency'):
+      value = self.interface_inverter.get_acoutputfrequency()
+    elif(sensor_type == 'acoutputpower'):
+      value = self.interface_inverter.get_acoutputpower()
     
     return value
   
@@ -650,167 +550,5 @@ class OmnikInverter():
     
     if(value is not None):
       value = int(value)
-    
-    return value
-  
-  def get_incometoday(self):
-    """ Gets the income for today. """
-    return None
-  
-  def get_incometotal(self):
-    """ Gets the total income. """
-    return None
-
-class OmnikPortal():
-  """ Class with function for reading data from the Omnik portal. """
-  
-  def __init__(self, host, port, username, password):
-    """ Initialize the Omnik portal object. """
-    self._host = host
-    self._port = port
-    self._username = username
-    self._password = password
-    self.token = None
-    self.station_id = None
-    self.data = None
-  
-  def get_token(self, host, port, username, password):
-    """ Gets authorisation token from the portal. """
-    token = None
-    
-    """ Generate the MD5 hash for the password. """
-    mdhash = hashlib.md5()
-    mdhash.update(password.encode('utf-8'))
-    pwhash = mdhash.hexdigest()
-    
-    """ Get token. """
-    try:
-      requesturl = BASE_URL.format(host, port, '/serverapi/?method=Login&username=' + username + '&password=' + pwhash + '&key=apitest&client=iPhone')
-      root = etree.parse(urlopen(requesturl)).getroot()
-      token = root.find('token').text
-    except:
-      token = None
-    
-    return token
-
-  def get_station_id(self, host, port, username, token):
-    """ Gets the station id for your inverter. """
-    station_id = None
-    
-    """ Get (only first) station. """
-    try:
-      stationlisturl = BASE_URL.format(host, port, '/serverapi/?method=Powerstationslist&username=' + username + '&token=' + token + '&key=apitest')
-      stationroot = etree.parse(urlopen(stationlisturl)).getroot()
-      for elem in stationroot.findall('power'):
-        station_id = elem.find('stationID').text
-    except:
-      station_id = None
-    
-    return station_id
-  
-  def get_statistics(self):
-    """ Get statistics from the portal. """
-    
-    if(self.token is None):
-      self.token = self.get_token(self._host, self._port, self._username, self._password)
-    if((self.station_id is None) and (self.token is not None)):
-      self.station_id = self.get_station_id(self._host, self._port, self._username, self.token)
-    
-    if((self.station_id is not None) and (self.token is not None)):
-      """Update the data from the portal."""
-      try:
-        dataurl = BASE_URL.format(self._host, self._port, '/serverapi/?method=Data&username=' + self._username + '&stationid=' + str(self.station_id) + '&token=' + self.token + '&key=apitest')
-        self.data = etree.parse(urlopen(dataurl)).getroot()
-      except:
-        self.data = None
-  
-  def get_actualpower(self):
-    """ Gets the actual power output by the inverter in Watt. """
-    value = None
-    try:
-      income = self.data.find('income')
-      value = income.find('ActualPower').text
-    except:
-      value = None
-    
-    return value
-  
-  def get_energytoday(self):
-    """ Gets the energy generated by inverter today in kWh. """
-    value = None
-    try:
-      income = self.data.find('income')
-      value = income.find('etoday').text
-    except:
-      value = None
-    
-    return value
-  
-  def get_energytotal(self):
-    """ Gets the total energy generated by inverter in kWh. """
-    value = None
-    try:
-      income = self.data.find('income')
-      value = income.find('etotal').text
-    except:
-      value = None
-    
-    return value
-  
-  def get_hourstotal(self):
-    """ Not supported by the portal. """
-    return None
-  
-  def get_invertersn(self):
-    """ Not supported by the portal. """
-    return None
-
-  def get_temperature(self):
-    """ Not supported by the portal. """
-    return None
-  
-  def get_dcinputvoltage(self, i=1):
-    """ Not supported by the portal. """
-    return None
-  
-  def get_dcinputcurrent(self, i=1):
-    """ Not supported by the portal. """
-    return None
-  
-  def get_acoutputvoltage(self, i=1):
-    """ Not supported by the portal. """
-    return None
-  
-  def get_acoutputcurrent(self, i=1):
-    """ Not supported by the portal. """
-    return None
-  
-  def get_acoutputfrequency(self, i=1):
-    """ Not supported by the portal. """
-    return None
-  
-  def get_acoutputpower(self, i=1):
-    """ Not supported by the portal. """
-    return None
-  
-  def get_incometoday(self):
-    """ Gets the income for today. """
-    value = None
-    try:
-      income = self.data.find('income')
-      value = income.find('TodayIncome').text
-    except:
-      value = None
-    
-    return value
-  
-  def get_incometotal(self):
-    """ Gets the total income. """
-    value = None
-    try:
-      income = self.data.find('income')
-      value = income.find('TotalIncome').text
-    except:
-      value = None
     
     return value
