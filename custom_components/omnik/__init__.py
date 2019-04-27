@@ -1,0 +1,1 @@
+"""The Omnik Inverter integration."""
