@@ -6,8 +6,8 @@
         "visit_repo": "https://github.com/heinoldenhuis/home_assistant_omnik_solar",
         "changelog": "https://github.com/heinoldenhuis/home_assistant_omnik_solar",
         "resources": [
-            "https://raw.githubusercontent.com/heinoldenhuis/home_assistant_omnik_solar/master/custom_components/omnik/manifest.json",
-            "https://raw.githubusercontent.com/heinoldenhuis/home_assistant_omnik_solar/master/custom_components/omnik/sensor.py"
+            "https://raw.githubusercontent.com/heinoldenhuis/home_assistant_omnik_solar/master/custom_components/omnik/sensor.py",
+            "https://raw.githubusercontent.com/heinoldenhuis/home_assistant_omnik_solar/master/custom_components/omnik/manifest.json"
         ]
     }
 }
