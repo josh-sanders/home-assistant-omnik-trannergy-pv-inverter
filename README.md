@@ -30,7 +30,7 @@ sensor:
   - platform: omnik
     inverter_host: 192.168.1.123
     inverter_port: 8899
-    inverter_serial: <serial number inverter> (example 1234567603)
+    inverter_serial: <serial number wifi/lan module> (example 1612345603)
     scan_interval: 60
     sensors:
       actualpower: [energytotal, energytoday]
@@ -51,7 +51,7 @@ Configuration variables:
 
 * **inverter_host** (Required): The IP address of the Omnik solar inverter.
 * **inverter_port** (Optional): The port nummber of the Omnik solar inverter. Default port 8899 is used.
-* **inverter_serial** (Required): The serial number of the Omnik solar inverter.
+* **inverter_serial** (Required): The device serial number of the Omnik solar wifi/lan module.
 * **sensors** (Required): List of values which will be presented as sensors:
   * *actualpower*: Sensor with the actual power value.
   * *energytoday*: Sensor with the total energy value for the current day.
