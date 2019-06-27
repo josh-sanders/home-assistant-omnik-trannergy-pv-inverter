@@ -12,7 +12,7 @@ from datetime import timedelta
 import voluptuous as vol
 
 from homeassistant.components.sensor import PLATFORM_SCHEMA
-from homeassistant.const import ( EVENT_HOMEASSISTANT_STOP, CONF_SCAN_INTERVAL )
+from homeassistant.const import ( EVENT_HOMEASSISTANT_STOP, CONF_NAME, CONF_SCAN_INTERVAL )
 import homeassistant.helpers.config_validation as cv
 from homeassistant.util import Throttle
 from homeassistant.helpers.entity import Entity
@@ -26,7 +26,7 @@ import struct
 import sys
 
 # VERSION
-VERSION = '0.0.2'
+VERSION = '0.0.3'
 
 BASE_URL = 'http://{0}:{1}{2}'
 
@@ -40,7 +40,7 @@ CONF_INVERTER_PORT = 'inverter_port'
 CONF_INVERTER_SERIAL = 'inverter_serial'
 CONF_SENSORS = 'sensors'
 
-SENSOR_PREFIX = 'Omnik '
+SENSOR_PREFIX = 'Omnik'
 SENSOR_TYPES = {
     'status':            ['Status', None, 'mdi:solar-power'],
     'actualpower':       ['Actual Power', 'W', 'mdi:weather-sunny'],
@@ -69,6 +69,7 @@ def _check_config_schema(conf):
   return conf
 
 PLATFORM_SCHEMA = vol.All(PLATFORM_SCHEMA.extend({
+    vol.Optional(CONF_NAME, default=SENSOR_PREFIX): cv.string,
     vol.Optional(CONF_INVERTER_HOST, default=None): cv.string,
     vol.Optional(CONF_INVERTER_PORT, default=DEFAULT_PORT_INVERTER): cv.positive_int,
     vol.Optional(CONF_INVERTER_SERIAL, default=None): cv.positive_int,
@@ -77,6 +78,7 @@ PLATFORM_SCHEMA = vol.All(PLATFORM_SCHEMA.extend({
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
   """ Set up Omnik sensor. """
+  inverter_name = config.get(CONF_NAME)
   inverter_host = config.get(CONF_INVERTER_HOST)
   inverter_port = config.get(CONF_INVERTER_PORT)
   inverter_sn = config.get(CONF_INVERTER_SERIAL)
@@ -99,20 +101,21 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
   """ Prepare the sensor entities. """
   hass_sensors = []
   for type, subtypes in config[CONF_SENSORS].items():
-    hass_sensors.append(OmnikSensor(data, type, subtypes))
+    hass_sensors.append(OmnikSensor(inverter_name, data, type, subtypes))
   
   add_devices(hass_sensors)
 
 class OmnikSensor(Entity):
   """ Representation of a Omnik sensor. """
   
-  def __init__(self, data, type, subtypes):
+  def __init__(self, inverter_name, data, type, subtypes):
     """Initialize the sensor."""
+    self._inverter_name = inverter_name
     self._data = data
     self._type = type
     self._subtypes = subtypes
     self.p_icon = SENSOR_TYPES[self._type][2]
-    self.p_name = SENSOR_PREFIX + SENSOR_TYPES[self._type][0]
+    self.p_name = self._inverter_name + ' ' + SENSOR_TYPES[self._type][0]
     self.p_state = None
     self.p_subtypes = {SENSOR_TYPES[subtype][0]: '{}'.format('unknown') for subtype in subtypes}
     self.p_uom = SENSOR_TYPES[self._type][1]
