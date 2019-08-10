@@ -1,11 +1,21 @@
 # Home Assistant Omnik solar sensor component
-The Omnik solar sensor component will retrieves data from an Omnik solar inverter.
+The Omnik solar sensor component will retrieve data from an Omnik solar inverter.
 The values will be presented as sensors (or attributes of sensors) in [Home Assistant](https://home-assistant.io/).
 
 > Note: Currently the Omnik Portal is not supported anymore. It seems that the Omnik Portal API is not operational anymore.
 Currently I do not see a solution to retrieve the data from the Omnik Portal website.
 
-## Installation:
+> Note: Your Omnik inverter must support http calls which is used to retrieve data responses.
+Some users indicated that their inverter not works and therefore no responses are received.
+
+
+## HACS (Home Assistant Community Store)
+
+This is a custom component. Custom components are not installed by default in your Home Assistant installation.
+[HACS](https://custom-components.github.io/hacs/) is an Home Assistant store integration from which this integration can be easily installed and updated.
+By using HACS you will also make sure that any new versions are installed by default and as simple as the installation itself.
+
+## Manual installation
 
 Create a directory called `omnik` in the `<config directory>/custom_components/` directory on your Home Assistant instance.
 Install this component by copying the files in [`/custom_components/omnik/`]
@@ -72,16 +82,4 @@ You can create composite sensors, where the subsensors will be shown as attribut
 ``` YAML
     sensors:
       actualpower: [energytotal, energytoday]
-```
-
-## Custom updater
-If you want this custom component to be auto updated, please add the
-configuration below to your configuration.yaml
-Make sure you've the custom_updater component installed and working - https://github.com/custom-components/custom_updater/ 
-
-Add a new reference under component_urls in your custom_updater configuration in configuration.yaml.
-```yaml
-custom_updater:
-  component_urls:
-    - https://raw.githubusercontent.com/heinoldenhuis/home_assistant_omnik_solar/master/custom_components.json
 ```

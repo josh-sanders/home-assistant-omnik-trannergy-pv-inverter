@@ -1,7 +1,7 @@
 {
   "domain": "omnik",
   "name": "Omnik Inverter",
-  "documentation": "https://github.com/heinoldenhuis/home_assistant_omnik_solar",
+  "documentation": "https://github.com/heinoldenhuis/home_assistant_omnik_solar/blob/master/README.md",
   "dependencies": [],
   "codeowners": [],
   "requirements": []
