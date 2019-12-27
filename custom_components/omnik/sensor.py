@@ -280,38 +280,18 @@ class OmnikInverter():
     """
     
     """ Convert the serial number into a bytes array. """
-    serial_hex = '{:x}'.format(serial_number)
-    serial_bytes = bytearray.fromhex(serial_hex)
+    double_hex = hex(serial_number)[2:] * 2
+    serial_bytes = bytearray.fromhex(double_hex)
+    serial_bytes.reverse()
     
-    """ Calculate the checksum. """
-    checksum = 0
-    for x in range(0, 4):
-      checksum += serial_bytes[x]
-    checksum *= 2
-    checksum += 115
-    checksum &= 0xff
-    
-    """ Convert the checksum into a byte. """
-    checksum_hex = '{:x}'.format(int(checksum))
-    checksum_bytes = bytearray.fromhex(checksum_hex)
-    
+    cs_count = 115 + sum(serial_bytes)
+    checksum = bytearray.fromhex(hex(cs_count)[-2:])
+
     """ Construct the message which requests the statistics. """
-    request_data = bytearray()
-    request_data.append(0x68)
-    request_data.append(0x02)
-    request_data.append(0x40)
-    request_data.append(0x30)
-    request_data.append(serial_bytes[3])
-    request_data.append(serial_bytes[2])
-    request_data.append(serial_bytes[1])
-    request_data.append(serial_bytes[0])
-    request_data.append(serial_bytes[3])
-    request_data.append(serial_bytes[2])
-    request_data.append(serial_bytes[1])
-    request_data.append(serial_bytes[0])
-    request_data.append(0x01)
-    request_data.append(0x00)
-    request_data.append(checksum_bytes[0])
+    request_data = bytearray([0x68, 0x02, 0x40, 0x30])
+    request_data.extend(serial_bytes)
+    request_data.extend([0x01, 0x00])
+    request_data.extend(checksum)
     request_data.append(0x16)
     
     return request_data
