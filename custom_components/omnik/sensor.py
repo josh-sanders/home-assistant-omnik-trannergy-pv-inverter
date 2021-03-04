@@ -26,7 +26,7 @@ import struct
 import sys
 
 # VERSION
-VERSION = '0.0.4'
+VERSION = '0.0.5'
 
 BASE_URL = 'http://{0}:{1}{2}'
 

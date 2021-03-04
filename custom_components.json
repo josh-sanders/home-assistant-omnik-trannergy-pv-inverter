@@ -1,6 +1,6 @@
 {
     "omnik": {
-        "version": "0.0.4",
+        "version": "0.0.5",
         "local_location": "/custom_components/omnik/sensor.py",
         "remote_location": "https://raw.githubusercontent.com/heinoldenhuis/home_assistant_omnik_solar/master/custom_components/omnik/sensor.py",
         "visit_repo": "https://github.com/heinoldenhuis/home_assistant_omnik_solar",
