@@ -11,11 +11,26 @@ from datetime import timedelta
 
 import voluptuous as vol
 
-from homeassistant.components.sensor import PLATFORM_SCHEMA
-from homeassistant.const import ( EVENT_HOMEASSISTANT_STOP, CONF_NAME, CONF_SCAN_INTERVAL )
+from homeassistant.components.sensor import (
+    PLATFORM_SCHEMA,
+    SensorEntity, 
+    STATE_CLASS_MEASUREMENT,
+    STATE_CLASS_TOTAL_INCREASING,
+)
+from homeassistant.const import ( 
+    EVENT_HOMEASSISTANT_STOP, 
+    CONF_NAME, 
+    CONF_SCAN_INTERVAL,
+    TEMP_CELSIUS,
+    DEVICE_CLASS_CURRENT,
+    DEVICE_CLASS_ENERGY,
+    DEVICE_CLASS_POWER,
+    DEVICE_CLASS_VOLTAGE,
+    DEVICE_CLASS_TEMPERATURE, 
+)
 import homeassistant.helpers.config_validation as cv
 from homeassistant.util import Throttle
-from homeassistant.helpers.entity import Entity
+#from homeassistant.helpers.entity import Entity
 from urllib.request import urlopen
 from xml.etree import ElementTree as etree
 
@@ -53,7 +68,7 @@ SENSOR_TYPES = {
     'dcinputcurrent':    ['DC Input Current', 'A', 'mdi:flash-outline', DEVICE_CLASS_CURRENT, STATE_CLASS_MEASUREMENT],
     'acoutputvoltage':   ['AC Output Voltage', 'V', 'mdi:flash-outline', DEVICE_CLASS_VOLTAGE, STATE_CLASS_MEASUREMENT],
     'acoutputcurrent':   ['AC Output Current', 'A', 'mdi:flash-outline', DEVICE_CLASS_CURRENT, STATE_CLASS_MEASUREMENT],
-    'acoutputfrequency': ['AC Output Frequency', 'Hz', 'mdi:flash-outline', DEVICE_CLASS_FREQUENCY, STATE_CLASS_MEASUREMENT],
+    'acoutputfrequency': ['AC Output Frequency', 'Hz', 'mdi:flash-outline', None, STATE_CLASS_MEASUREMENT],
     'acoutputpower':     ['AC Output Power', 'W', 'mdi:flash-outline',DEVICE_CLASS_POWER, STATE_CLASS_MEASUREMENT],
   }
 
@@ -101,14 +116,14 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
   """ Prepare the sensor entities. """
   hass_sensors = []
   for type, subtypes in config[CONF_SENSORS].items():
-    hass_sensors.append(OmnikSensor(inverter_name, data, type, subtypes))
+    hass_sensors.append(OmnikSensor(inverter_name, inverter_sn, data, type, subtypes))
   
   add_devices(hass_sensors)
 
 class OmnikSensor(SensorEntity):
   """ Representation of an Omnik sensor. """
 
-  def __init__(self, inverter_name, inverter_sn, sensor_type):
+  def __init__(self, inverter_name, inverter_sn, data, type, subtypes):
     """Initialize the sensor."""
     self._inverter_name = inverter_name
     self._data = data
@@ -116,21 +131,21 @@ class OmnikSensor(SensorEntity):
     self._subtypes = subtypes
 
     self.p_subtypes = {SENSOR_TYPES[subtype][0]: '{}'.format('unknown') for subtype in subtypes}
-   
+
     # Properties
     self._icon = SENSOR_TYPES[self._type][2]
     self._name = self._inverter_name + ' ' + SENSOR_TYPES[self._type][0]
     self._attr_native_value = None
-    self._attr_native_unit_of_measurement = SENSOR_TYPES[sensor_type][1]
-    self._attr_device_class = SENSOR_TYPES[sensor_type][3]
-    self._attr_state_class = SENSOR_TYPES[sensor_type][4]
+    self._attr_native_unit_of_measurement = SENSOR_TYPES[self._type][1]
+    self._attr_device_class = SENSOR_TYPES[self._type][3]
+    self._attr_state_class = SENSOR_TYPES[self._type][4]
     self._attr_unique_id = f"{inverter_sn}{self._name}".replace(" ", "_")
 
 
   @property
   def should_poll(self):
     """No polling needed."""
-    return False
+    return True
   
   @property
   def device_state_attributes(self):
@@ -146,7 +161,7 @@ class OmnikSensor(SensorEntity):
   def name(self):
     """ Return the name of the sensor. """
     return self._name
-   
+
   def update(self):
     """ Update this sensor using the data. """
     
