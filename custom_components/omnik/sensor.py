@@ -11,11 +11,26 @@ from datetime import timedelta
 
 import voluptuous as vol
 
-from homeassistant.components.sensor import PLATFORM_SCHEMA
-from homeassistant.const import ( EVENT_HOMEASSISTANT_STOP, CONF_NAME, CONF_SCAN_INTERVAL )
+from homeassistant.components.sensor import (
+    PLATFORM_SCHEMA,
+    SensorEntity, 
+    STATE_CLASS_MEASUREMENT,
+    STATE_CLASS_TOTAL_INCREASING,
+)
+from homeassistant.const import ( 
+    EVENT_HOMEASSISTANT_STOP, 
+    CONF_NAME, 
+    CONF_SCAN_INTERVAL,
+    TEMP_CELSIUS,
+    DEVICE_CLASS_CURRENT,
+    DEVICE_CLASS_ENERGY,
+    DEVICE_CLASS_POWER,
+    DEVICE_CLASS_VOLTAGE,
+    DEVICE_CLASS_TEMPERATURE, 
+)
 import homeassistant.helpers.config_validation as cv
 from homeassistant.util import Throttle
-from homeassistant.helpers.entity import Entity
+#from homeassistant.helpers.entity import Entity
 from urllib.request import urlopen
 from xml.etree import ElementTree as etree
 
@@ -26,7 +41,7 @@ import struct
 import sys
 
 # VERSION
-VERSION = '0.0.5'
+VERSION = '0.0.6'
 
 BASE_URL = 'http://{0}:{1}{2}'
 
@@ -42,19 +57,19 @@ CONF_SENSORS = 'sensors'
 
 SENSOR_PREFIX = 'Omnik'
 SENSOR_TYPES = {
-    'status':            ['Status', None, 'mdi:solar-power'],
-    'actualpower':       ['Actual Power', 'W', 'mdi:weather-sunny'],
-    'energytoday':       ['Energy Today', 'kWh', 'mdi:flash-outline'],
-    'energytotal':       ['Energy Total', 'kWh', 'mdi:flash-outline'],
-    'hourstotal':        ['Hours Total', 'Hours', 'mdi:timer'],
-    'invertersn':        ['Inverter Serial Number', None, 'mdi:information-outline'],
-    'temperature':       ['Temperature', '°C', 'mdi:thermometer'],
-    'dcinputvoltage':    ['DC Input Voltage', 'V', 'mdi:flash-outline'],
-    'dcinputcurrent':    ['DC Input Current', 'A', 'mdi:flash-outline'],
-    'acoutputvoltage':   ['AC Output Voltage', 'V', 'mdi:flash-outline'],
-    'acoutputcurrent':   ['AC Output Current', 'A', 'mdi:flash-outline'],
-    'acoutputfrequency': ['AC Output Frequency', 'Hz', 'mdi:flash-outline'],
-    'acoutputpower':     ['AC Output Power', 'W', 'mdi:flash-outline'],
+    'status':            ['Status', None, 'mdi:solar-power', None, None],
+    'actualpower':       ['Actual Power', 'W', 'mdi:weather-sunny',DEVICE_CLASS_POWER, STATE_CLASS_MEASUREMENT],
+    'energytoday':       ['Energy Today', 'kWh', 'mdi:flash-outline', DEVICE_CLASS_ENERGY, STATE_CLASS_TOTAL_INCREASING],
+    'energytotal':       ['Energy Total', 'kWh', 'mdi:flash-outline', DEVICE_CLASS_ENERGY, STATE_CLASS_TOTAL_INCREASING],
+    'hourstotal':        ['Hours Total', 'Hours', 'mdi:timer', None, None],
+    'invertersn':        ['Inverter Serial Number', None, 'mdi:information-outline', None, None],
+    'temperature':       ['Temperature', '°C', 'mdi:thermometer', DEVICE_CLASS_TEMPERATURE, STATE_CLASS_MEASUREMENT],
+    'dcinputvoltage':    ['DC Input Voltage', 'V', 'mdi:flash-outline', DEVICE_CLASS_VOLTAGE, STATE_CLASS_MEASUREMENT],
+    'dcinputcurrent':    ['DC Input Current', 'A', 'mdi:flash-outline', DEVICE_CLASS_CURRENT, STATE_CLASS_MEASUREMENT],
+    'acoutputvoltage':   ['AC Output Voltage', 'V', 'mdi:flash-outline', DEVICE_CLASS_VOLTAGE, STATE_CLASS_MEASUREMENT],
+    'acoutputcurrent':   ['AC Output Current', 'A', 'mdi:flash-outline', DEVICE_CLASS_CURRENT, STATE_CLASS_MEASUREMENT],
+    'acoutputfrequency': ['AC Output Frequency', 'Hz', 'mdi:flash-outline', None, STATE_CLASS_MEASUREMENT],
+    'acoutputpower':     ['AC Output Power', 'W', 'mdi:flash-outline',DEVICE_CLASS_POWER, STATE_CLASS_MEASUREMENT],
   }
 
 def _check_config_schema(conf):
@@ -101,24 +116,36 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
   """ Prepare the sensor entities. """
   hass_sensors = []
   for type, subtypes in config[CONF_SENSORS].items():
-    hass_sensors.append(OmnikSensor(inverter_name, data, type, subtypes))
+    hass_sensors.append(OmnikSensor(inverter_name, inverter_sn, data, type, subtypes))
   
   add_devices(hass_sensors)
 
-class OmnikSensor(Entity):
-  """ Representation of a Omnik sensor. """
-  
-  def __init__(self, inverter_name, data, type, subtypes):
+class OmnikSensor(SensorEntity):
+  """ Representation of an Omnik sensor. """
+
+  def __init__(self, inverter_name, inverter_sn, data, type, subtypes):
     """Initialize the sensor."""
     self._inverter_name = inverter_name
     self._data = data
     self._type = type
     self._subtypes = subtypes
-    self.p_icon = SENSOR_TYPES[self._type][2]
-    self.p_name = self._inverter_name + ' ' + SENSOR_TYPES[self._type][0]
-    self.p_state = None
+
     self.p_subtypes = {SENSOR_TYPES[subtype][0]: '{}'.format('unknown') for subtype in subtypes}
-    self.p_uom = SENSOR_TYPES[self._type][1]
+
+    # Properties
+    self._icon = SENSOR_TYPES[self._type][2]
+    self._name = self._inverter_name + ' ' + SENSOR_TYPES[self._type][0]
+    self._attr_native_value = None
+    self._attr_native_unit_of_measurement = SENSOR_TYPES[self._type][1]
+    self._attr_device_class = SENSOR_TYPES[self._type][3]
+    self._attr_state_class = SENSOR_TYPES[self._type][4]
+    self._attr_unique_id = f"{inverter_sn}{self._name}".replace(" ", "_")
+
+
+  @property
+  def should_poll(self):
+    """No polling needed."""
+    return True
   
   @property
   def device_state_attributes(self):
@@ -128,26 +155,13 @@ class OmnikSensor(Entity):
   @property
   def icon(self):
     """ Return the icon of the sensor. """
-    return self.p_icon
+    return self._icon
     
   @property
   def name(self):
     """ Return the name of the sensor. """
-    return self.p_name
-  
-  @property
-  def unit_of_measurement(self):
-    """ Return the unit the value is expressed in. """
-    uom = self.p_uom
-    if(self.p_state is None):
-      uom = None
-    return uom
-  
-  @property
-  def state(self):
-    """ Return the state of the sensor. """
-    return self.p_state
-  
+    return self._name
+
   def update(self):
     """ Update this sensor using the data. """
     
@@ -170,7 +184,7 @@ class OmnikSensor(Entity):
     
     """ Update sensor value. """
     new_state = sensor_data[self._type]
-    self.p_state = new_state
+    self._attr_native_value = new_state
 
 class OmnikData(object):
   """ Representation of a Omnik data object used for retrieving data values. """
