@@ -1,9 +1,10 @@
 {
   "domain": "omnik",
   "name": "Omnik Inverter",
-  "version": "0.0.6",
-  "documentation": "https://github.com/heinoldenhuis/home_assistant_omnik_solar/blob/master/README.md",
+  "version": "0.0.7",
+  "iot_class": "cloud_polling",
+  "documentation": "https://github.com/hultenvp/home_assistant_omnik_solar/blob/master/README.md",
   "dependencies": [],
-  "codeowners": [],
+  "codeowners": ["@hultenvp"],
   "requirements": []
 }
