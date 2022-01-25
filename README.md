@@ -1,9 +1,11 @@
 # Home Assistant Omnik solar sensor component
+> Note: This is a continuation of the archived work of https://github.com/heinoldenhuis/home_assistant_omnik_solar. For now, only manual install and install via custom repositories option in HACS
+
 The Omnik solar sensor component will retrieve data from an Omnik solar inverter.
 The values will be presented as sensors (or attributes of sensors) in [Home Assistant](https://home-assistant.io/).
 
-> Note: Currently the Omnik Portal is not supported anymore. It seems that the Omnik Portal API is not operational anymore.
-Currently I do not see a solution to retrieve the data from the Omnik Portal website.
+> Note: Currently the Omnik Portal is not supported anymore. Omnik went bankrupt and the Omnik Portal API is not operational anymore.
+You could consider moving to [OmnikPortal.net](https://omnikportal.net/), but I currently have no intention of supporting that portal.
 
 > Note: Your Omnik inverter must support http calls which is used to retrieve data responses.
 Some users indicated that their inverter not works and therefore no responses are received.
