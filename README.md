@@ -8,7 +8,7 @@ The values will be presented as sensors (or attributes of sensors) in [Home Assi
 You could consider moving to [OmnikPortal.net](https://omnikportal.net/), but I currently have no intention of supporting that portal.
 
 > Note: Your Omnik inverter must support http calls which is used to retrieve data responses.
-Some users indicated that their inverter not works and therefore no responses are received.
+Some users indicated that their inverter not works and therefore no responses are received. For those the [omnik-inverter](https://github.com/robbinjanssen/home-assistant-omnik-inverter) custom integration might be a solution.
 
 
 ## HACS (Home Assistant Community Store)
@@ -85,3 +85,7 @@ You can create composite sensors, where the subsensors will be shown as attribut
     sensors:
       actualpower: [energytotal, energytoday]
 ```
+
+# Thanks
+Big thanks to [@heinoldenhuis](https://github.com/heinoldenhuis) for the original integration.
+
