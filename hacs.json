@@ -1,0 +1,7 @@
+{
+  "name": "Omnik Solar integration",
+  "content_in_root": false,
+  "render_readme": false,
+  "homeassistant": "2021.9",
+  "domains": ["sensor"]
+}
