@@ -1,5 +1,5 @@
 # Home Assistant Omnik solar sensor component
-> Note: This is a continuation of the archived work of https://github.com/heinoldenhuis/home_assistant_omnik_solar.
+> Note: ⚠️ This is a continuation of the archived work of https://github.com/heinoldenhuis/home_assistant_omnik_solar.
 
 The Omnik solar sensor component will retrieve data from an Omnik solar inverter.
 The values will be presented as sensors (or attributes of sensors) in [Home Assistant](https://home-assistant.io/).
