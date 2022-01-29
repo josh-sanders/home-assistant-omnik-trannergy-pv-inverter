@@ -41,7 +41,7 @@ import struct
 import sys
 
 # VERSION
-VERSION = '0.0.6'
+VERSION = '0.1.0'
 
 BASE_URL = 'http://{0}:{1}{2}'
 
@@ -148,8 +148,8 @@ class OmnikSensor(SensorEntity):
     return True
   
   @property
-  def device_state_attributes(self):
-    """ Return the state attributes of the sensor. """
+  def extra_state_attributes(self):
+    """Return entity specific state attributes."""
     return self.p_subtypes
   
   @property
