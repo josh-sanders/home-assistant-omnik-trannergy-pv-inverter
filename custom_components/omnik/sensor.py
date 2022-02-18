@@ -64,12 +64,24 @@ SENSOR_TYPES = {
     'hourstotal':        ['Hours Total', 'Hours', 'mdi:timer', None, None],
     'invertersn':        ['Inverter Serial Number', None, 'mdi:information-outline', None, None],
     'temperature':       ['Temperature', '°C', 'mdi:thermometer', DEVICE_CLASS_TEMPERATURE, STATE_CLASS_MEASUREMENT],
-    'dcinputvoltage':    ['DC Input Voltage', 'V', 'mdi:flash-outline', DEVICE_CLASS_VOLTAGE, STATE_CLASS_MEASUREMENT],
-    'dcinputcurrent':    ['DC Input Current', 'A', 'mdi:flash-outline', DEVICE_CLASS_CURRENT, STATE_CLASS_MEASUREMENT],
-    'acoutputvoltage':   ['AC Output Voltage', 'V', 'mdi:flash-outline', DEVICE_CLASS_VOLTAGE, STATE_CLASS_MEASUREMENT],
-    'acoutputcurrent':   ['AC Output Current', 'A', 'mdi:flash-outline', DEVICE_CLASS_CURRENT, STATE_CLASS_MEASUREMENT],
-    'acoutputfrequency': ['AC Output Frequency', 'Hz', 'mdi:flash-outline', None, STATE_CLASS_MEASUREMENT],
-    'acoutputpower':     ['AC Output Power', 'W', 'mdi:flash-outline',DEVICE_CLASS_POWER, STATE_CLASS_MEASUREMENT],
+    'dcinputvoltage1':    ['DC Input Voltage 1', 'V', 'mdi:flash-outline', DEVICE_CLASS_VOLTAGE, STATE_CLASS_MEASUREMENT],
+    'dcinputcurrent1':    ['DC Input Current 1', 'A', 'mdi:flash-outline', DEVICE_CLASS_CURRENT, STATE_CLASS_MEASUREMENT],
+    'dcinputvoltage2':    ['DC Input Voltage 2', 'V', 'mdi:flash-outline', DEVICE_CLASS_VOLTAGE, STATE_CLASS_MEASUREMENT],
+    'dcinputcurrent2':    ['DC Input Current 2', 'A', 'mdi:flash-outline', DEVICE_CLASS_CURRENT, STATE_CLASS_MEASUREMENT],
+    'dcinputvoltage3':    ['DC Input Voltage 3', 'V', 'mdi:flash-outline', DEVICE_CLASS_VOLTAGE, STATE_CLASS_MEASUREMENT],
+    'dcinputcurrent3':    ['DC Input Current 3', 'A', 'mdi:flash-outline', DEVICE_CLASS_CURRENT, STATE_CLASS_MEASUREMENT],
+    'acoutputvoltage1':   ['AC Output Voltage 1', 'V', 'mdi:flash-outline', DEVICE_CLASS_VOLTAGE, STATE_CLASS_MEASUREMENT],
+    'acoutputcurrent1':   ['AC Output Current 1', 'A', 'mdi:flash-outline', DEVICE_CLASS_CURRENT, STATE_CLASS_MEASUREMENT],
+    'acoutputfrequency1': ['AC Output Frequency 1', 'Hz', 'mdi:flash-outline', None, STATE_CLASS_MEASUREMENT],
+    'acoutputpower1':     ['AC Output Power 1', 'W', 'mdi:flash-outline',DEVICE_CLASS_POWER, STATE_CLASS_MEASUREMENT],
+    'acoutputvoltage2':   ['AC Output Voltage 2', 'V', 'mdi:flash-outline', DEVICE_CLASS_VOLTAGE, STATE_CLASS_MEASUREMENT],
+    'acoutputcurrent2':   ['AC Output Current 2', 'A', 'mdi:flash-outline', DEVICE_CLASS_CURRENT, STATE_CLASS_MEASUREMENT],
+    'acoutputfrequency2': ['AC Output Frequency 2', 'Hz', 'mdi:flash-outline', None, STATE_CLASS_MEASUREMENT],
+    'acoutputpower2':     ['AC Output Power 2', 'W', 'mdi:flash-outline',DEVICE_CLASS_POWER, STATE_CLASS_MEASUREMENT],
+    'acoutputvoltage3':   ['AC Output Voltage 3', 'V', 'mdi:flash-outline', DEVICE_CLASS_VOLTAGE, STATE_CLASS_MEASUREMENT],
+    'acoutputcurrent3':   ['AC Output Current 3', 'A', 'mdi:flash-outline', DEVICE_CLASS_CURRENT, STATE_CLASS_MEASUREMENT],
+    'acoutputfrequency3': ['AC Output Frequency 3', 'Hz', 'mdi:flash-outline', None, STATE_CLASS_MEASUREMENT],
+    'acoutputpower3':     ['AC Output Power 3', 'W', 'mdi:flash-outline',DEVICE_CLASS_POWER, STATE_CLASS_MEASUREMENT],
   }
 
 def _check_config_schema(conf):
@@ -207,50 +219,60 @@ class OmnikData(object):
     self.interface_inverter.get_statistics()
 
   def read_sensor(self, sensor_type):
-    """ Gets the data values from the sensors. """
+    """Gets the data values from the sensors."""
     value = None
 
     """ Check if the inverter is operational. """
     inverter_enabled = False
     check = self.interface_inverter.get_temperature()
-    if(check is not None):
+    if check is not None:
       inverter_enabled = True
 
-    #_LOGGER.warn('read_sensor: inverter enabled %s', inverter_enabled)
+    # TODO: All code below (the way read_sensor is called) needs a refactor.
+
+    def find_and_get_property(t, values):
+      for (name, getter) in values.items():
+        if t.startswith(name):
+          n = t.removeprefix(name)
+          return getter(int(n))
 
     """ Retrieve value. """
-    if(sensor_type == 'status'):
-      if(inverter_enabled == True):
-        value = 'Online'
+    if sensor_type == "status":
+      if inverter_enabled == True:
+        value = "Online"
       else:
-        value = 'Offline'
-    if(sensor_type == 'actualpower'):
-      if(inverter_enabled == True):
+        value = "Offline"
+    if sensor_type == "actualpower":
+      if inverter_enabled == True:
         value = self.interface_inverter.get_actualpower()
       else:
         value = 0
-    elif(sensor_type == 'energytoday'):
+    elif sensor_type == "energytoday":
       value = self.interface_inverter.get_energytoday()
-    elif(sensor_type == 'energytotal'):
+    elif sensor_type == "energytotal":
       value = self.interface_inverter.get_energytotal()
-    elif(sensor_type == 'hourstotal'):
+    elif sensor_type == "hourstotal":
       value = self.interface_inverter.get_hourstotal()
-    elif(sensor_type == 'invertersn'):
+    elif sensor_type == "invertersn":
       value = self.interface_inverter.get_invertersn()
-    elif(sensor_type == 'temperature'):
+    elif sensor_type == "temperature":
       value = self.interface_inverter.get_temperature()
-    elif(sensor_type == 'dcinputvoltage'):
-      value = self.interface_inverter.get_dcinputvoltage()
-    elif(sensor_type == 'dcinputcurrent'):
-      value = self.interface_inverter.get_dcinputcurrent()
-    elif(sensor_type == 'acoutputvoltage'):
-      value = self.interface_inverter.get_acoutputvoltage()
-    elif(sensor_type == 'acoutputcurrent'):
-      value = self.interface_inverter.get_acoutputcurrent()
-    elif(sensor_type == 'acoutputfrequency'):
-      value = self.interface_inverter.get_acoutputfrequency()
-    elif(sensor_type == 'acoutputpower'):
-      value = self.interface_inverter.get_acoutputpower()
+    elif sensor_type.startswith("dcinput"):
+      t = sensor_type.removeprefix("dcinput")
+      values = {
+        "voltage": self.interface_inverter.get_dcinputvoltage,
+        "current": self.interface_inverter.get_dcinputcurrent,
+      }
+      value = find_and_get_property(t, values)
+    elif sensor_type.startswith("acoutput"):
+      t = sensor_type.removeprefix("acoutput")
+      values = {
+        "voltage": self.interface_inverter.get_acoutputvoltage,
+        "current": self.interface_inverter.get_acoutputcurrent,
+        "frequency": self.interface_inverter.get_acoutputfrequency,
+        "power": self.interface_inverter.get_acoutputpower,
+      }
+      value = find_and_get_property(t, values)
 
     return value
 
