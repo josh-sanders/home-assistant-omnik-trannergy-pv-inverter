@@ -52,12 +52,14 @@ sensor:
       hourstotal:
       invertersn:
       temperature:
-      dcinputvoltage:
-      dcinputcurrent:
-      acoutputvoltage:
-      acoutputcurrent:
-      acoutputfrequency:
-      acoutputpower:
+      dcinputvoltage1:
+      dcinputcurrent1:
+      dcinputvoltage2:
+      dcinputcurrent2:
+      acoutputvoltage1:
+      acoutputcurrent1:
+      acoutputfrequency1:
+      acoutputpower1:
 ```
 
 Configuration variables:
