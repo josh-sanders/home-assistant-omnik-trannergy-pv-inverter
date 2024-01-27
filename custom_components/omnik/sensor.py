@@ -1,9 +1,9 @@
 """
-  Omnik Solar interface.
+  PV Inverter interface.
 
-  This component can retrieve data from the Omnik inverter.
+  This component can retrieve data from an Omnik or Trannergy PV inverter.
 
-  For more information: https://github.com/heinoldenhuis/home_assistant_omnik_solar/
+  For more information: https://github.com/josh-sanders/home_assistant_omnik_solar/
 """
 
 import logging
@@ -13,24 +13,17 @@ import voluptuous as vol
 
 from homeassistant.components.sensor import (
     PLATFORM_SCHEMA,
+    SensorDeviceClass,
     SensorEntity,
-    STATE_CLASS_MEASUREMENT,
-    STATE_CLASS_TOTAL_INCREASING,
+    SensorStateClass,
 )
 from homeassistant.const import (
     EVENT_HOMEASSISTANT_STOP,
     CONF_NAME,
     CONF_SCAN_INTERVAL,
-    TEMP_CELSIUS,
-    DEVICE_CLASS_CURRENT,
-    DEVICE_CLASS_ENERGY,
-    DEVICE_CLASS_POWER,
-    DEVICE_CLASS_VOLTAGE,
-    DEVICE_CLASS_TEMPERATURE,
 )
 import homeassistant.helpers.config_validation as cv
 from homeassistant.util import Throttle
-#from homeassistant.helpers.entity import Entity
 from urllib.request import urlopen
 from xml.etree import ElementTree as etree
 
@@ -39,9 +32,6 @@ import hashlib
 import socket
 import struct
 import sys
-
-# VERSION
-VERSION = '0.1.0'
 
 BASE_URL = 'http://{0}:{1}{2}'
 
@@ -57,31 +47,31 @@ CONF_SENSORS = 'sensors'
 
 SENSOR_PREFIX = 'Omnik'
 SENSOR_TYPES = {
-    'status':            ['Status', None, 'mdi:solar-power', None, None],
-    'actualpower':       ['Actual Power', 'W', 'mdi:solar-power',DEVICE_CLASS_POWER, STATE_CLASS_MEASUREMENT],
-    'energytoday':       ['Energy Today', 'kWh', 'mdi:flash-outline', DEVICE_CLASS_ENERGY, STATE_CLASS_TOTAL_INCREASING],
-    'energytotal':       ['Energy Total', 'kWh', 'mdi:chart-bell-curve-cumulative', DEVICE_CLASS_ENERGY, STATE_CLASS_TOTAL_INCREASING],
+    'status':            ['Status', None, 'mdi:weather-sunny', None, None],
+    'actualpower':       ['Actual Power', 'W', 'mdi:solar-power', SensorDeviceClass.POWER, SensorStateClass.MEASUREMENT],
+    'energytoday':       ['Energy Today', 'kWh', 'mdi:flash-outline', SensorDeviceClass.ENERGY, SensorStateClass.TOTAL_INCREASING],
+    'energytotal':       ['Energy Total', 'kWh', 'mdi:chart-bell-curve-cumulative', SensorDeviceClass.ENERGY, SensorStateClass.TOTAL_INCREASING],
     'hourstotal':        ['Hours Total', 'Hours', 'mdi:clock', None, None],
     'invertersn':        ['Inverter Serial Number', None, 'mdi:information-outline', None, None],
-    'temperature':       ['Temperature', '°C', 'mdi:thermometer', DEVICE_CLASS_TEMPERATURE, STATE_CLASS_MEASUREMENT],
-    'dcinputvoltage1':    ['DC Input Voltage 1', 'V', 'mdi:flash-outline', DEVICE_CLASS_VOLTAGE, STATE_CLASS_MEASUREMENT],
-    'dcinputcurrent1':    ['DC Input Current 1', 'A', 'mdi:current-dc', DEVICE_CLASS_CURRENT, STATE_CLASS_MEASUREMENT],
-    'dcinputvoltage2':    ['DC Input Voltage 2', 'V', 'mdi:flash-outline', DEVICE_CLASS_VOLTAGE, STATE_CLASS_MEASUREMENT],
-    'dcinputcurrent2':    ['DC Input Current 2', 'A', 'mdi:current-dc', DEVICE_CLASS_CURRENT, STATE_CLASS_MEASUREMENT],
-    'dcinputvoltage3':    ['DC Input Voltage 3', 'V', 'mdi:flash-outline', DEVICE_CLASS_VOLTAGE, STATE_CLASS_MEASUREMENT],
-    'dcinputcurrent3':    ['DC Input Current 3', 'A', 'mdi:current-dc', DEVICE_CLASS_CURRENT, STATE_CLASS_MEASUREMENT],
-    'acoutputvoltage1':   ['AC Output Voltage 1', 'V', 'mdi:flash-outline', DEVICE_CLASS_VOLTAGE, STATE_CLASS_MEASUREMENT],
-    'acoutputcurrent1':   ['AC Output Current 1', 'A', 'mdi:current-ac', DEVICE_CLASS_CURRENT, STATE_CLASS_MEASUREMENT],
-    'acoutputfrequency1': ['AC Output Frequency 1', 'Hz', 'mdi:sine-wave', None, STATE_CLASS_MEASUREMENT],
-    'acoutputpower1':     ['AC Output Power 1', 'W', 'mdi:flash-outline',DEVICE_CLASS_POWER, STATE_CLASS_MEASUREMENT],
-    'acoutputvoltage2':   ['AC Output Voltage 2', 'V', 'mdi:flash-outline', DEVICE_CLASS_VOLTAGE, STATE_CLASS_MEASUREMENT],
-    'acoutputcurrent2':   ['AC Output Current 2', 'A', 'mdi:current-ac', DEVICE_CLASS_CURRENT, STATE_CLASS_MEASUREMENT],
-    'acoutputfrequency2': ['AC Output Frequency 2', 'Hz', 'mdi:sine-wave', None, STATE_CLASS_MEASUREMENT],
-    'acoutputpower2':     ['AC Output Power 2', 'W', 'mdi:flash-outline',DEVICE_CLASS_POWER, STATE_CLASS_MEASUREMENT],
-    'acoutputvoltage3':   ['AC Output Voltage 3', 'V', 'mdi:flash-outline', DEVICE_CLASS_VOLTAGE, STATE_CLASS_MEASUREMENT],
-    'acoutputcurrent3':   ['AC Output Current 3', 'A', 'mdi:current-ac', DEVICE_CLASS_CURRENT, STATE_CLASS_MEASUREMENT],
-    'acoutputfrequency3': ['AC Output Frequency 3', 'Hz', 'mdi:sine-wave', None, STATE_CLASS_MEASUREMENT],
-    'acoutputpower3':     ['AC Output Power 3', 'W', 'mdi:flash-outline',DEVICE_CLASS_POWER, STATE_CLASS_MEASUREMENT],
+    'temperature':       ['Temperature', '°C', 'mdi:thermometer', SensorDeviceClass.TEMPERATURE, SensorStateClass.MEASUREMENT],
+    'dcinputvoltage1':    ['DC Input Voltage 1', 'V', 'mdi:flash-outline', SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT],
+    'dcinputcurrent1':    ['DC Input Current 1', 'A', 'mdi:current-dc', SensorDeviceClass.CURRENT, SensorStateClass.MEASUREMENT],
+    'dcinputvoltage2':    ['DC Input Voltage 2', 'V', 'mdi:flash-outline', SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT],
+    'dcinputcurrent2':    ['DC Input Current 2', 'A', 'mdi:current-dc', SensorDeviceClass.CURRENT, SensorStateClass.MEASUREMENT],
+    'dcinputvoltage3':    ['DC Input Voltage 3', 'V', 'mdi:flash-outline', SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT],
+    'dcinputcurrent3':    ['DC Input Current 3', 'A', 'mdi:current-dc', SensorDeviceClass.CURRENT, SensorStateClass.MEASUREMENT],
+    'acoutputvoltage1':   ['AC Output Voltage 1', 'V', 'mdi:flash-outline', SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT],
+    'acoutputcurrent1':   ['AC Output Current 1', 'A', 'mdi:current-ac', SensorDeviceClass.CURRENT, SensorStateClass.MEASUREMENT],
+    'acoutputfrequency1': ['AC Output Frequency 1', 'Hz', 'mdi:sine-wave', None, SensorStateClass.MEASUREMENT],
+    'acoutputpower1':     ['AC Output Power 1', 'W', 'mdi:flash-outline',SensorDeviceClass.POWER, SensorStateClass.MEASUREMENT],
+    'acoutputvoltage2':   ['AC Output Voltage 2', 'V', 'mdi:flash-outline', SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT],
+    'acoutputcurrent2':   ['AC Output Current 2', 'A', 'mdi:current-ac', SensorDeviceClass.CURRENT, SensorStateClass.MEASUREMENT],
+    'acoutputfrequency2': ['AC Output Frequency 2', 'Hz', 'mdi:sine-wave', None, SensorStateClass.MEASUREMENT],
+    'acoutputpower2':     ['AC Output Power 2', 'W', 'mdi:flash-outline',SensorDeviceClass.POWER, SensorStateClass.MEASUREMENT],
+    'acoutputvoltage3':   ['AC Output Voltage 3', 'V', 'mdi:flash-outline', SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT],
+    'acoutputcurrent3':   ['AC Output Current 3', 'A', 'mdi:current-ac', SensorDeviceClass.CURRENT, SensorStateClass.MEASUREMENT],
+    'acoutputfrequency3': ['AC Output Frequency 3', 'Hz', 'mdi:sine-wave', None, SensorStateClass.MEASUREMENT],
+    'acoutputpower3':     ['AC Output Power 3', 'W', 'mdi:flash-outline',SensorDeviceClass.POWER, SensorStateClass.MEASUREMENT],
   }
 
 def _check_config_schema(conf):
