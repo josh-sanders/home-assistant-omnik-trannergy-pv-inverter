@@ -3,7 +3,7 @@
 
   This component can retrieve data from an Omnik or Trannergy PV inverter.
 
-  For more information: https://github.com/josh-sanders/home_assistant_omnik_solar/
+  For more information: https://github.com/josh-sanders/home-assistant-omnik-trannergy-pv-inverter/
 """
 
 import logging

@@ -3,14 +3,15 @@
 The Omnik/Trannergy PV Inverter custom component will retrieve data from an Omnik or Trannergy PV inverter.
 The values will be presented as sensors (or attributes of sensors) in [Home Assistant](https://home-assistant.io/).
 
-![Home Assistant dashboard showing Omnik/Trannergy PV Inverter custom compnent](https://raw.githubusercontent.com/josh-sanders/home_assistant_omnik_solar/master/images/omnik_sensor_ui.png)
+![Home Assistant dashboard showing Omnik/Trannergy PV Inverter custom compnent](https://raw.githubusercontent.com/josh-sanders/home-assistant-omnik-trannergy-pv-inverter/master/images/omnik_sensor_ui.png)
 
 > ❤️ This is a continuation of the archived work of: https://github.com/heinoldenhuis/home_assistant_omnik_solar and https://github.com/hultenvp/home_assistant_omnik_solar.
 
 > ⚠️  Your PV inverter must support http calls which is used to retrieve data responses.
-Some users indicated that their inverter not works and therefore no responses are received. For those the [omnik-inverter](https://github.com/robbinjanssen/home-assistant-omnik-inverter) custom integration might be a solution.
 
 ## HACS (Home Assistant Community Store)
+
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=josh-sanders&repository=home-assistant-omnik-trannergy-pv-inverter&category=integration)
 
 This is a custom component. Custom components are not installed by default in your Home Assistant installation.
 [HACS](https://custom-components.github.io/hacs/) is an Home Assistant store integration from which this integration can be easily installed and updated.
@@ -21,9 +22,9 @@ By using HACS you will also make sure that any new versions are installed by def
 Create a directory called `omnik` in the `<config directory>/custom_components/` directory on your Home Assistant instance.
 Install this component by copying the files in [`/custom_components/omnik/`]:
 
-* [`__init__.py`](https://raw.githubusercontent.com/josh-sanders/home_assistant_omnik_solar/master/custom_components/omnik/__init__.py),
-* [`manifest.json`](https://raw.githubusercontent.com/josh-sanders/home_assistant_omnik_solar/master/custom_components/omnik/manifest.json), and
-* [`sensor.py`](https://raw.githubusercontent.com/josh-sanders/home_assistant_omnik_solar/master/custom_components/omnik/sensor.py)
+* [`__init__.py`](https://raw.githubusercontent.com/josh-sanders/home-assistant-omnik-trannergy-pv-inverter/master/custom_components/omnik/__init__.py),
+* [`manifest.json`](https://raw.githubusercontent.com/josh-sanders/home-assistant-omnik-trannergy-pv-inverter/master/custom_components/omnik/manifest.json), and
+* [`sensor.py`](https://raw.githubusercontent.com/josh-sanders/home-assistant-omnik-trannergy-pv-inverter/master/custom_components/omnik/sensor.py)
 
 from this repo into the new `<config directory>/custom_components/omnik/` directory you just created.
 
@@ -99,3 +100,10 @@ Big thanks to:
 
 * [@heinoldenhuis](https://github.com/heinoldenhuis) for the original integration.
 * [@hultenvp](https://github.com/hultenvp) for previously maintaining this HACS custom component.
+
+## Similar Projects
+
+If this custom component is not working for you, please try these similar projects:
+
+* [Omnik Inverter Integration for Home Assistant](https://github.com/robbinjanssen/home-assistant-omnik-inverter)
+* [Home Assistant custom component for SolarMAN (IGEN Tech) solar inverter logger](https://github.com/KodeCR/home-assistant-solarman)
