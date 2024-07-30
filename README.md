@@ -1,15 +1,14 @@
-# Home Assistant Omnik solar sensor component
-> Note: ⚠️ This is a continuation of the archived work of https://github.com/heinoldenhuis/home_assistant_omnik_solar.
+# Home Assistant Omnik/Trannergy PV Inverter custom component
 
-The Omnik solar sensor component will retrieve data from an Omnik solar inverter.
+The Omnik/Trannergy PV Inverter custom component will retrieve data from an Omnik or Trannergy PV inverter.
 The values will be presented as sensors (or attributes of sensors) in [Home Assistant](https://home-assistant.io/).
 
-> Note: Currently the Omnik Portal is not supported anymore. Omnik went bankrupt and the Omnik Portal API is not operational anymore.
-You could consider moving to [OmnikPortal.net](https://omnikportal.net/), but I currently have no intention of supporting that portal.
+![Home Assistant dashboard showing Omnik/Trannergy PV Inverter custom compnent](https://raw.githubusercontent.com/josh-sanders/home_assistant_omnik_solar/master/images/omnik_sensor_ui.png)
 
-> Note: Your Omnik inverter must support http calls which is used to retrieve data responses.
+> ❤️ This is a continuation of the archived work of: https://github.com/heinoldenhuis/home_assistant_omnik_solar and https://github.com/hultenvp/home_assistant_omnik_solar.
+
+> ⚠️  Your PV inverter must support http calls which is used to retrieve data responses.
 Some users indicated that their inverter not works and therefore no responses are received. For those the [omnik-inverter](https://github.com/robbinjanssen/home-assistant-omnik-inverter) custom integration might be a solution.
-
 
 ## HACS (Home Assistant Community Store)
 
@@ -21,10 +20,11 @@ By using HACS you will also make sure that any new versions are installed by def
 
 Create a directory called `omnik` in the `<config directory>/custom_components/` directory on your Home Assistant instance.
 Install this component by copying the files in [`/custom_components/omnik/`]
-(https://raw.githubusercontent.com/heinoldenhuis/home_assistant_omnik_solar/master/custom_components/omnik/__init__.py, 
-https://raw.githubusercontent.com/heinoldenhuis/home_assistant_omnik_solar/master/custom_components/omnik/manifest.json and  https://raw.githubusercontent.com/heinoldenhuis/home_assistant_omnik_solar/master/custom_components/omnik/sensor.py) from this repo into the new `<config directory>/custom_components/omnik/` directory you just created
+(https://raw.githubusercontent.com/josh-sanders/home_assistant_omnik_solar/master/custom_components/omnik/__init__.py, 
+https://raw.githubusercontent.com/josh-sanders/home_assistant_omnik_solar/master/custom_components/omnik/manifest.json and  https://raw.githubusercontent.com/josh-sanders/home_assistant_omnik_solar/master/custom_components/omnik/sensor.py) from this repo into the new `<config directory>/custom_components/omnik/` directory you just created
 
 This is how your custom_components directory should be:
+
 ```bash
 custom_components
 ├── omnik
@@ -83,11 +83,15 @@ Configuration variables:
   * *acoutputpower*: Sensor with the actual AC output power value.
 
 You can create composite sensors, where the subsensors will be shown as attributes of the main sensor, for example:
+
 ``` YAML
     sensors:
       actualpower: [energytotal, energytoday]
 ```
 
-# Thanks
-Big thanks to [@heinoldenhuis](https://github.com/heinoldenhuis) for the original integration.
+## Thanks 🌞
 
+Big thanks to:
+
+* [@heinoldenhuis](https://github.com/heinoldenhuis) for the original integration.
+* [@hultenvp](https://github.com/hultenvp) for previously maintaining this HACS custom component.

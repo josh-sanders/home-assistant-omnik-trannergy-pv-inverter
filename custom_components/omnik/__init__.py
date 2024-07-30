@@ -1,1 +1,1 @@
-"""The Omnik Inverter integration."""
+"""The Omnik/Trannergy PV Inverter integration."""
