@@ -1,12 +1,12 @@
 {
   "domain": "omnik",
   "name": "Omnik/Trannergy PV Inverter",
-  "version": "0.1.1",
-  "iot_class": "local_polling",
+  "codeowners": ["@josh-sanders"],
+  "dependencies": [],
   "documentation": "https://github.com/josh-sanders/home_assistant_omnik_solar/blob/master/README.md",
   "integration_type": "device",
+  "iot_class": "local_polling",
   "issue_tracker": "https://github.com/josh-sanders/home_assistant_omnik_solar/issues",
-  "dependencies": [],
-  "codeowners": ["@josh-sanders"],
-  "requirements": []
+  "requirements": [],
+  "version": "0.1.1"
 }
