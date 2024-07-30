@@ -19,9 +19,13 @@ By using HACS you will also make sure that any new versions are installed by def
 ## Manual installation
 
 Create a directory called `omnik` in the `<config directory>/custom_components/` directory on your Home Assistant instance.
-Install this component by copying the files in [`/custom_components/omnik/`]
-(https://raw.githubusercontent.com/josh-sanders/home_assistant_omnik_solar/master/custom_components/omnik/__init__.py, 
-https://raw.githubusercontent.com/josh-sanders/home_assistant_omnik_solar/master/custom_components/omnik/manifest.json and  https://raw.githubusercontent.com/josh-sanders/home_assistant_omnik_solar/master/custom_components/omnik/sensor.py) from this repo into the new `<config directory>/custom_components/omnik/` directory you just created
+Install this component by copying the files in [`/custom_components/omnik/`]:
+
+* [`__init__.py`](https://raw.githubusercontent.com/josh-sanders/home_assistant_omnik_solar/master/custom_components/omnik/__init__.py),
+* [`manifest.json`](https://raw.githubusercontent.com/josh-sanders/home_assistant_omnik_solar/master/custom_components/omnik/manifest.json), and
+* [`sensor.py`](https://raw.githubusercontent.com/josh-sanders/home_assistant_omnik_solar/master/custom_components/omnik/sensor.py)
+
+from this repo into the new `<config directory>/custom_components/omnik/` directory you just created.
 
 This is how your custom_components directory should be:
 
@@ -72,7 +76,7 @@ Configuration variables:
   * *actualpower*: Sensor with the actual power value.
   * *energytoday*: Sensor with the total energy value for the current day.
   * *energytotal*: Sensor with the total energy value.
-  * *hourstotal*: Sensor with the actual power value.
+  * *hourstotal*: Sensor with the total hours value.
   * *invertersn*: Sensor with the serial number value.
   * *temperature*: Sensor with the temperature value for the inverter.
   * *dcinputvoltage*: Sensor with the actual DC input voltage value.
