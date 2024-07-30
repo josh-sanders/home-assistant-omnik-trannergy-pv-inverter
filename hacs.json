@@ -1,7 +1,5 @@
 {
-  "name": "Omnik Solar integration",
+  "name": "Omnik / Trannergy PV Inverter custom component for Home Assistant",
   "content_in_root": false,
-  "render_readme": false,
-  "homeassistant": "2021.9",
-  "domains": ["sensor"]
+  "render_readme": true
 }
