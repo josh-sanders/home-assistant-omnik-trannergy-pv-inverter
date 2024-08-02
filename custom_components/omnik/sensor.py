@@ -51,7 +51,7 @@ SENSOR_TYPES = {
     'actualpower':       ['Actual Power', 'W', 'mdi:solar-power', SensorDeviceClass.POWER, SensorStateClass.MEASUREMENT],
     'energytoday':       ['Energy Today', 'kWh', 'mdi:flash-outline', SensorDeviceClass.ENERGY, SensorStateClass.TOTAL_INCREASING],
     'energytotal':       ['Energy Total', 'kWh', 'mdi:chart-bell-curve-cumulative', SensorDeviceClass.ENERGY, SensorStateClass.TOTAL_INCREASING],
-    'hourstotal':        ['Hours Total', 'Hours', 'mdi:clock', SensorDeviceClass.DURATION, SensorStateClass.TOTAL_INCREASING],
+    'hourstotal':        ['Hours Total', 'h', 'mdi:clock', SensorDeviceClass.DURATION, SensorStateClass.TOTAL_INCREASING],
     'invertersn':        ['Inverter Serial Number', None, 'mdi:information-outline', None, None],
     'temperature':       ['Temperature', '°C', 'mdi:thermometer', SensorDeviceClass.TEMPERATURE, SensorStateClass.MEASUREMENT],
     'dcinputvoltage1':    ['DC Input Voltage 1', 'V', 'mdi:flash-outline', SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT],
