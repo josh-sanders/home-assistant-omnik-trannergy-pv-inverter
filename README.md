@@ -11,11 +11,18 @@ The values will be presented as sensors (or attributes of sensors) in [Home Assi
 
 ## HACS (Home Assistant Community Store)
 
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=josh-sanders&repository=home-assistant-omnik-trannergy-pv-inverter&category=integration)
+🚀 Coming soon: [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=josh-sanders&repository=home-assistant-omnik-trannergy-pv-inverter&category=integration)
 
-This is a custom component. Custom components are not installed by default in your Home Assistant installation.
-[HACS](https://custom-components.github.io/hacs/) is an Home Assistant store integration from which this integration can be easily installed and updated.
-By using HACS you will also make sure that any new versions are installed by default and as simple as the installation itself.
+I've submitted a [pull request](https://github.com/hacs/default/pull/2627) to have this integration published to HACS, until it's merged you can add it as a custom repository. Do the following:
+
+1. Open the HACS dashboard by clicking on HACS in the lefthand menu of Home Assistant
+2. Click on the 3 dots in the top right corner
+3. Select "Custom repositories"
+4. Add the URL to this repository: <https://github.com/josh-sanders/home-assistant-omnik-trannergy-pv-inverter/>
+5. Select "Integration" 
+6. Click the "ADD" button
+
+The [Home Assistant Community Store (HACS)](https://hacs.xyz/) is a custom integration that provides a UI to manage custom elements in Home Assistant. HACS is a custom component and is not installed by default in your Home Assistant installation. By using HACS you will also make sure that any new versions are installed by default and as simple as the installation itself.
 
 ## Manual installation
 
