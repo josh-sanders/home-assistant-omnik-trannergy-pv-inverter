@@ -325,23 +325,32 @@ class OmnikInverter():
   def get_statistics(self):
     """ Get statistics from the inverter. """
 
+    sock = None
+
     """ Create a socket (SOCK_STREAM means a TCP socket). """
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
     try:
-      """ Connect to server and send data. """
-      sock.connect((self._host, self._port))
-      sock.sendall(OmnikInverter.generate_request(self._serial_number))
-
-      """ Receive data from the server and shut down. """
-      self.raw_msg = sock.recv(1024)
-
+      sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     except:
-      """ Error handling. """
+      sock = None
+
+    """ Connect to server. """
+    try:
+      sock.connect((self._host, self._port))
+    except:
+      sock.close()
+      sock = None
+
+    if sock is None:
       self.raw_msg = None
       _LOGGER.debug('Could not connect to the inverter on %s:%s', self._host, self._port)
-    finally:
-      sock.close()
+      return
+
+    """ Query the server and receive data. """
+    with sock:
+      sock.sendall(OmnikInverter.generate_request(self._serial_number))
+      self.raw_msg = sock.recv(1024)
+      _LOGGER.info('Recieved: %s', repr(self.raw_msg))
+
     return
 
   def __get_string(self, begin, end):
