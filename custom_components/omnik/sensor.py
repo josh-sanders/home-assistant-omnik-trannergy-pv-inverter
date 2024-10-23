@@ -24,16 +24,9 @@ from homeassistant.const import (
 )
 import homeassistant.helpers.config_validation as cv
 from homeassistant.util import Throttle
-from urllib.request import urlopen
-from xml.etree import ElementTree as etree
 
-import binascii
-import hashlib
 import socket
 import struct
-import sys
-
-BASE_URL = 'http://{0}:{1}{2}'
 
 _LOGGER = logging.getLogger(__name__)
 
