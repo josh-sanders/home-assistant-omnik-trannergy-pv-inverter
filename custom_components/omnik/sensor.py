@@ -31,7 +31,7 @@ import struct
 _LOGGER = logging.getLogger(__name__)
 
 DEFAULT_PORT_INVERTER = 8899
-MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=1)
+MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=5)
 
 CONF_INVERTER_HOST = 'inverter_host'
 CONF_INVERTER_PORT = 'inverter_port'
@@ -324,6 +324,7 @@ class OmnikInverter():
     """ Create a socket (SOCK_STREAM means a TCP socket). """
     try:
       sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+      sock.settimeout(3)
     except:
       sock = None
 
