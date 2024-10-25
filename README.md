@@ -3,9 +3,15 @@
 The Omnik/Trannergy PV Inverter custom component uses local polling to retrieve data from an Omnik or Trannergy PV inverter.
 The values will be presented as sensors (or attributes of sensors) in [Home Assistant](https://home-assistant.io/).
 
-> ❤️ This is a continuation of the archived work of: [hultenvp/home_assistant_omnik_solar](https://github.com/hultenvp/home_assistant_omnik_solar).
+> ❤️ This integration is a continuation of [hultenvp/home_assistant_omnik_solar](https://github.com/hultenvp/home_assistant_omnik_solar), which is now archived.
 
 ![Home Assistant dashboard showing Omnik/Trannergy PV Inverter custom compnent](https://raw.githubusercontent.com/josh-sanders/home-assistant-omnik-trannergy-pv-inverter/master/images/omnik_sensor_ui.png)
+
+## Supported inverters
+
+I have tested this integration with a Trannergy SGN5400TL that has a wifi kit with serial number starting with 645xxxxxx.
+
+Please comment on your experience with this integration in the [github discussion](https://github.com/josh-sanders/home-assistant-omnik-trannergy-pv-inverter/discussions/3).
 
 ## Installation
 
@@ -42,7 +48,7 @@ Install this component by copying the files in [`/custom_components/omnik/`]:
 
 from this repo into the new `<config directory>/custom_components/omnik/` directory you just created.
 
-This is how your custom_components directory should be:
+This is how your `custom_components/` directory should be:
 
 ```bash
 custom_components
@@ -54,7 +60,9 @@ custom_components
 
 ## Configuration
 
-To enable this sensor, add the following  example to your `configuration.yaml` file:
+After you've completed installation, you need to edit Home Assistants' [`configuration.yaml`](https://www.home-assistant.io/docs/configuration/) file. This file contains integrations to be loaded along with their configurations. Throughout the documentation, you will find snippets that you can add to your configuration file to enable specific functionality.
+
+The following example has everything you need to get started, just change the values for your inverter's serial number and host IPv4 address:
 
 ``` YAML
 sensor:
@@ -83,9 +91,9 @@ sensor:
 
 ### Configuration variables
 
-* **`inverter_serial`** (Required): The device serial number of the Omnik solar wifi/lan module.
-* **`inverter_host`** (Required): The IP address of the Omnik solar inverter.
-* **`inverter_port`** (Optional): The port nummber of the Omnik solar inverter. Default port 8899 is used.
+* **`inverter_serial`** (Required): The device serial number of the PV inverter's wifi/lan module.
+* **`inverter_host`** (Required): The IP address of the PV inverter.
+* **`inverter_port`** (Optional): The port nummber of the PV inverter. Default port 8899 is used.
 * **`name`** (Optional): Let you overwrite the name of the device in the frontend. *Default value: Omnik*
 * **`scan_interval`** (Optional): The inverter will be polled at an interval specified in seconds.
 * **`sensors`** (Required): List of values which will be presented as sensors:
@@ -102,10 +110,9 @@ sensor:
   * *`acoutputfrequency`*: Sensor with the actual AC output frequenty value.
   * *`acoutputpower`*: Sensor with the actual AC output power value.
 
-The `dcinput` and `acoutput` sensors can be configured to report data for up to 3 channels, for example:
+The `dcinput` and `acoutput` sensors can be configured for up to 3 channels, for example:
 
 ``` YAML
-    sensors:
       dcinputvoltage1:   
       dcinputcurrent1:   
       dcinputvoltage2:   
@@ -129,7 +136,6 @@ The `dcinput` and `acoutput` sensors can be configured to report data for up to 
 You can create composite sensors, where the subsensors will be shown as attributes of the main sensor, for example:
 
 ``` YAML
-    sensors:
       actualpower: [energytotal, energytoday]
 ```
 
