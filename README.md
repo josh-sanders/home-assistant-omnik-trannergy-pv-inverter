@@ -50,7 +50,7 @@ from this repo into the new `<config directory>/custom_components/omnik/` direct
 
 This is how your `custom_components/` directory should be:
 
-```bash
+``` bash
 custom_components
 ├── omnik
 │   ├── __init__.py
@@ -101,7 +101,7 @@ sensor:
   * *`energytoday`*: Sensor with the total energy value for the current day.
   * *`energytotal`*: Sensor with the total energy value.
   * *`hourstotal`*: Sensor with the total hours value.
-  * *i`nvertersn`*: Sensor with the serial number value.
+  * *`invertersn`*: Sensor with the serial number value.
   * *`temperature`*: Sensor with the temperature value for the inverter.
   * *`dcinputvoltage`*: Sensor with the actual DC input voltage value.
   * *`dcinputcurrent`*: Sensor with the actual DC input current value.
@@ -155,3 +155,4 @@ If this custom component is not working for you, please try these similar projec
 * [robbinjanssen/home-assistant-omnik-inverter](https://github.com/robbinjanssen/home-assistant-omnik-inverter): Omnik Inverter Integration for Home Assistant
 * [KodeCR/home-assistant-solarman](https://github.com/KodeCR/home-assistant-solarman): Home Assistant custom component for SolarMAN (IGEN Tech) solar inverter logger
 * [XtheOne/Inverter-Data-Logger](https://github.com/XtheOne/Inverter-Data-Logger):Data logger for Omnik/Hosola and other Solarman Wi-Fi kit powered Solar Inverters
+* [davidrapan/ha-solarman](https://github.com/davidrapan/ha-solarman): ⚡ Solarman Stick Logger integration for 🏡 Home Assistant
