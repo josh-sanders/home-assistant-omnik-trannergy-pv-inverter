@@ -7,7 +7,7 @@
 """
 
 import logging
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 import voluptuous as vol
 
@@ -65,6 +65,7 @@ SENSOR_TYPES = {
   'acoutputcurrent3':   ['AC Output Current 3',    'A',   'mdi:current-ac',                  SensorDeviceClass.CURRENT,     SensorStateClass.MEASUREMENT],
   'acoutputfrequency3': ['AC Output Frequency 3',  'Hz',  'mdi:sine-wave',                   SensorDeviceClass.FREQUENCY,   SensorStateClass.MEASUREMENT],
   'acoutputpower3':     ['AC Output Power 3',      'W',   'mdi:solar-power',                 SensorDeviceClass.POWER,       SensorStateClass.MEASUREMENT],
+  'lastupdated':        ['Last Updated',           None,  'mdi:sun-clock-outline',           SensorDeviceClass.TIMESTAMP,   None],
 }
 
 def _check_config_schema(conf):
@@ -270,6 +271,16 @@ class OmnikData(object):
     """ Update the data of the sensors. """
     self.get_statistics()
 
+    try:
+   
+      _LOGGER.info('sensor data: %s', repr(self.sensor_data))
+
+      _LOGGER.info('last connected: %s', repr(self.interface_inverter.lastconnected))
+
+      self.sensor_data['lastupdated'] = self.interface_inverter.lastconnected
+    except:
+      _LOGGER.info('print update is broken')
+
     """ Retrieve the data values for the sensors. """
     self.update_sensor_values()
 
@@ -282,6 +293,7 @@ class OmnikInverter():
     self._port = port
     self._serial_number = serial_number
     self.raw_msg = None
+    self.lastconnected = None
 
   @staticmethod
   def generate_request(serial_number):
@@ -339,13 +351,19 @@ class OmnikInverter():
       self.raw_msg = None
       _LOGGER.debug('Could not connect to the inverter on %s:%s', self._host, self._port)
       return
+    else:
+      try:
+        self.lastconnected = datetime.now()
+        _LOGGER.info('last connected: %s', repr(self.lastconnected))
+      except:
+        _LOGGER.info('lastconnected is broken')
 
     """ Query the server and receive data. """
     with sock:
       sock.sendall(OmnikInverter.generate_request(self._serial_number))
       self.raw_msg = sock.recv(1024)
-      _LOGGER.info('Response: %s', self.raw_msg.hex(' '))
-
+      _LOGGER.info('Response: %s', self.raw_msg.hex())
+      _LOGGER.info('Response: %s', self.raw_msg)
     return
 
   def __get_string(self, begin, end):
